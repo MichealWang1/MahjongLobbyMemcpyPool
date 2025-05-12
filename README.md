@@ -1,0 +1,2 @@
+# MahjongLobbyMemcpyPoolMahjongLobbyMemcpyPool
+2018年在中手游搭建框架时写的内存池
