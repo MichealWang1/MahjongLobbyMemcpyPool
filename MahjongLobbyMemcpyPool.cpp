@@ -54,16 +54,69 @@ void UnitTestMomoryWrite()
 void UnitTestMultiThreading()
 {
     std::cout << "开始执行单元测试 UnitTestMultiThreading start" << std::endl;
-    const int ThreadsNum = 4;
-    const int ThreadAllocsPre = 1000;
+    const int32_t ThreadsNum = 4;
+    const int32_t ThreadAllocsPre = 1000;
     std::atomic<bool> HasError{ false };
 
+    auto threadFunc = [&HasError]()
+    {
+        try
+        {
+            std::vector<std::pair<void*, size_t>> vecAllocations;
+            vecAllocations.reserve(ALIGNMENT);
 
+            for (int32_t i = 0; i < ThreadAllocsPre && !HasError; ++i)
+            {
+                size_t nSize = (rand() % 256 + 1) * 8;
+                void* pTemp = MemoryPool::NewMemoryCache(nSize);
+                if (nullptr = pTemp)
+                {
+                    std::cerr << "UnitTestMultiThreading NewMemoryCache Fail   nSize = " << nSize << std::endl;
+                    HasError = true;
+                    break;
+                }
+
+                vecAllocations.push_back({ pTemp, nSize });
+                std::cout << "UnitTestMultiThreading NewMemoryCache Success nSizenSize = " << nSize << endl;
+                if (rand() % 2 && !vecAllocations.empty())
+                {
+                    size_t nIndex = rand() % vecAllocations.size();
+                    MemoryPool::DeleteMemoryCache(vecAllocations[nIndex].first, vecAllocations[nIndex].second);
+                    vecAllocations.erase(vecAllocations.begin() + nIndex);
+                }
+            }
+
+            for (const auto& stCache : vecAllocations)
+            {
+                MemoryPool::DeleteMemoryCache(stCache.first, stCache.second);
+            }
+        }
+        catch (const std::exception& e)
+        {
+            std::cerr << "Thread exception: " << e.what() << std::endl;
+            HasError = true;
+        }
+    };
+
+    std::vector<std::thread> vecThread;
+    for (int i = 0; i < ThreadsNum; ++i)
+    {
+        vecThread.emplace_back(threadFunc);
+    }
+
+    for (auto& thread : vecThread)
+    {
+        thread.join();
+    }
 
     std::cout << "开始执行单元测试 UnitTestMultiThreading end" << std::endl;
 }
 
-// 性能测试相关
+// 边界测试
+void UnitTestEdgeCasess() 
+{
+
+}
 
 
 
