@@ -1,2 +1,3 @@
-# MahjongLobbyMemcpyPoolMahjongLobbyMemcpyPool
+# MahjongLobbyMemcpyPool
 2018年在中手游搭建框架时写的内存池
+是多线程版内存池
